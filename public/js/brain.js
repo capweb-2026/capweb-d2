@@ -24,7 +24,7 @@ export function replyTo(message) {
     return 'Tu peux écrire salut, aide ou test.';
   }
   if (question === 'test') {
-    return 'Bonne réponse : explique ton raisonnement avant de proposer une solution.';
+    return 'Conseil : explique ton raisonnement avant de proposer une solution.';
   }
 
   return 'Je ne connais pas encore cette question. Essaie « aide ».';
