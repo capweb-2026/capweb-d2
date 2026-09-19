@@ -16,8 +16,8 @@ Identité retenue :
 
 ## Critères d'acceptation
 
-1. Quand l'identité est chargée, le système vérifie que le nom, sans les espaces autour, fait de 2 à 20 caractères, et refuse tout nom qui ne respecte pas cette longueur.
-2. Quand l'identité est chargée, le système vérifie que l'emoji est un seul caractère visible (un emoji comme 🛡️ compte pour un, même si sa longueur JavaScript est supérieure), et refuse du texte ou deux emojis.
+1. Quand la page s'affiche, le système montre le nom dans le titre principal (`h1`), avant tout message ; il a vérifié que le nom, sans les espaces autour, fait de 2 à 20 caractères, et refuse tout nom qui ne respecte pas cette longueur.
+2. Quand la page s'affiche, le système montre un seul emoji devant le nom dans le titre principal (`🚀 Cap Web`), avant tout message ; il a vérifié que l'emoji est un seul caractère visible (un emoji comme 🛡️ compte pour un, même si sa longueur JavaScript est supérieure), et refuse du texte ou deux emojis.
 3. Quand la conversation est vide, le système affiche dans `#accueil` un message d'accueil qui contient le nom ; dès qu'un message est envoyé, l'accueil disparaît.
 4. Quand la page s'affiche, le système montre exactement trois questions suggérées sous forme de boutons dans `#suggestions` ; après un clic sur l'une d'elles, `#message` contient cette question et `#messages` n'a aucune ligne de plus.
 5. Quand l'assistant répond, sa ligne dans `#messages` commence par son emoji suivi de son nom (`🚀 Cap Web : …`), et la ligne de l'utilisateur commence par `Vous : `.
@@ -37,11 +37,11 @@ Identité retenue :
   - `validatePersona(persona)` : renvoie `{ ok: true }` si le nom (après `trim()`) fait de 2 à 20 caractères, si l'emoji est un seul caractère visible (mesuré avec `Intl.Segmenter`, un seul segment contenant un pictogramme), si l'accueil contient le nom, et s'il y a exactement trois suggestions non vides de 280 caractères au plus ; sinon `{ ok: false, error: '…' }` avec un message en français, sans lever d'exception, même si l'argument n'est pas un objet.
   - `signature(persona)` : renvoie `'🚀 Cap Web'` (l'emoji, une espace, le nom) pour `PERSONA`.
 - **`public/js/persona.js`** ne touche pas à la page : ni `document`, ni `window`, ni `localStorage`.
-- **`public/js/view.js`** : `renderMessages(messages, container)` préfixe les lignes de l'assistant par la signature et celles de l'utilisateur par `Vous`, avec `textContent` uniquement. Ajoute `renderAccueil(persona, conteneur, visible)` et `renderSuggestions(persona, conteneur, surClic)` qui fabriquent leurs éléments sans `innerHTML`.
+- **`public/js/view.js`** : `renderMessages(messages, container)` préfixe les lignes de l'assistant par la signature et celles de l'utilisateur par `Vous`, avec `textContent` uniquement. Ajoute `renderEntete(persona, titre)`, qui écrit `signature(persona)` dans le titre principal, ainsi que `renderAccueil(persona, conteneur, visible)` et `renderSuggestions(persona, conteneur, surClic)`, qui fabriquent leurs éléments sans `innerHTML`.
 - **`public/js/app.js`** : branche ces fonctions ; l'historique stocké sous `capweb.historique` ne change pas de forme (`{ role, text }`) : la signature est ajoutée à l'affichage, pas au stockage.
-- **`public/index.html`** : ajoute `#accueil` et `#suggestions` en dehors de `#messages`.
+- **`public/index.html`** : le titre principal est l'unique `h1`, d'identifiant `#titre-page` ; ajoute `#accueil` et `#suggestions` en dehors de `#messages`.
 - **`server/app.js`** : ajoute `js/persona.js` à `FICHIERS` (`/js/persona.js`) et à `TYPES` (`text/javascript; charset=utf-8`), sans autre changement.
-- **Tests** : `tests/persona.test.js` (Node) pour les critères 1 et 2 ; les critères 3 à 5 par des tests navigateur ajoutés dans un nouveau fichier de `browser/`, sans toucher à `browser/contrat.spec.js`.
+- **Tests** : `tests/identite.test.js` (Node) pour la validation des critères 1 et 2 ; `browser/identite-entete.spec.js` pour leur affichage dans le titre ; `browser/identite.spec.js` pour les critères 3 à 5, sans toucher à `browser/contrat.spec.js`.
 
 ## Questions ouvertes
 
