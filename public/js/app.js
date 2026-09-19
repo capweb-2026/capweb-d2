@@ -1,10 +1,14 @@
 import { validateMessage, replyTo } from './brain.js';
-import { renderMessages } from './view.js';
+import { PERSONA, validatePersona } from './persona.js';
+import { renderMessages, renderAccueil, renderSuggestions, renderEntete } from './view.js';
 
 const formulaire = document.querySelector('#chat-form');
 const statut = document.querySelector('#status');
 const champ = document.querySelector('#message');
 const liste = document.querySelector('#messages');
+const titre = document.querySelector('#titre-page');
+const accueil = document.querySelector('#accueil');
+const zoneSuggestions = document.querySelector('#suggestions');
 const versionElt = document.querySelector('#version');
 const boutonEffacer = document.querySelector('#effacer');
 
@@ -30,8 +34,24 @@ function charger() {
   }
 }
 
+function afficher() {
+  renderMessages(historique, liste);
+  renderAccueil(PERSONA, accueil, historique.length === 0);
+}
+
 charger();
-renderMessages(historique, liste);
+afficher();
+
+const identite = validatePersona(PERSONA);
+if (identite.ok) {
+  renderEntete(PERSONA, titre);
+  renderSuggestions(PERSONA, zoneSuggestions, (question) => {
+    champ.value = question;
+    champ.focus();
+  });
+} else {
+  statut.textContent = identite.error;
+}
 
 formulaire?.addEventListener('submit', (event) => {
   event.preventDefault();
@@ -45,7 +65,7 @@ formulaire?.addEventListener('submit', (event) => {
 
   historique.push({ role: 'user', text: validation.value });
   historique.push({ role: 'assistant', text: replyTo(validation.value) });
-  renderMessages(historique, liste);
+  afficher();
   sauvegarder();
 
   champ.value = '';
@@ -59,7 +79,7 @@ boutonEffacer?.addEventListener('click', () => {
   }
   historique.length = 0;
   localStorage.removeItem(CLE_HISTORIQUE);
-  renderMessages(historique, liste);
+  afficher();
 });
 
 fetch('/version.json', { headers: { accept: 'application/json' } })
