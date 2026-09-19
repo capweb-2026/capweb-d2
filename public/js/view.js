@@ -10,6 +10,10 @@ export function renderMessages(messages, container) {
   container.replaceChildren(...lignes);
 }
 
+export function renderEntete(persona, titre) {
+  titre.textContent = signature(persona);
+}
+
 export function renderAccueil(persona, conteneur, visible) {
   conteneur.textContent = persona.greeting;
   conteneur.hidden = !visible;

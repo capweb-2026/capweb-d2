@@ -1,11 +1,12 @@
 import { validateMessage, replyTo } from './brain.js';
 import { PERSONA, validatePersona } from './persona.js';
-import { renderMessages, renderAccueil, renderSuggestions } from './view.js';
+import { renderMessages, renderAccueil, renderSuggestions, renderEntete } from './view.js';
 
 const formulaire = document.querySelector('#chat-form');
 const statut = document.querySelector('#status');
 const champ = document.querySelector('#message');
 const liste = document.querySelector('#messages');
+const titre = document.querySelector('#titre-page');
 const accueil = document.querySelector('#accueil');
 const zoneSuggestions = document.querySelector('#suggestions');
 const versionElt = document.querySelector('#version');
@@ -43,6 +44,7 @@ afficher();
 
 const identite = validatePersona(PERSONA);
 if (identite.ok) {
+  renderEntete(PERSONA, titre);
   renderSuggestions(PERSONA, zoneSuggestions, (question) => {
     champ.value = question;
     champ.focus();
