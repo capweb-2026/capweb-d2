@@ -1,4 +1,4 @@
-import { validateMessage, replyTo } from './brain.js';
+import { validateMessage } from './brain.js';
 import { PERSONA, validatePersona } from './persona.js';
 import { renderMessages, renderAccueil, renderSuggestions, renderEntete } from './view.js';
 
@@ -53,7 +53,7 @@ if (identite.ok) {
   statut.textContent = identite.error;
 }
 
-formulaire?.addEventListener('submit', (event) => {
+formulaire?.addEventListener('submit', async (event) => {
   event.preventDefault();
 
   const validation = validateMessage(champ.value);
@@ -63,13 +63,60 @@ formulaire?.addEventListener('submit', (event) => {
     return;
   }
 
-  historique.push({ role: 'user', text: validation.value });
-  historique.push({ role: 'assistant', text: replyTo(validation.value) });
+  const message = validation.value;
+
+  historique.push({ role: 'user', text: message });
   afficher();
   sauvegarder();
 
   champ.value = '';
-  statut.textContent = '';
+  statut.textContent = 'Réponse en cours...';
+
+  try {
+    const reponse = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        accept: 'application/json',
+      },
+      body: JSON.stringify({ message }),
+    });
+
+    if (!reponse.ok) {
+      throw new Error('Réponse serveur invalide');
+    }
+
+    const donnees = await reponse.json();
+
+    if (typeof donnees.text !== 'string' || donnees.text.trim() === '') {
+      throw new Error('Réponse vide');
+    }
+
+    historique.push({
+      role: 'assistant',
+      text: donnees.text,
+    });
+
+    afficher();
+    sauvegarder();
+
+    if (donnees.source === 'regles') {
+      statut.textContent = 'Mode dégradé : réponse avec les règles.';
+    } else {
+      statut.textContent = '';
+    }
+  } catch {
+    historique.push({
+      role: 'assistant',
+      text: 'Je ne peux pas contacter le service IA pour le moment.',
+    });
+
+    afficher();
+    sauvegarder();
+
+    statut.textContent = 'Mode dégradé : service IA indisponible.';
+  }
+
   champ.focus();
 });
 
